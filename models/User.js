@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const userSchema = mongoose.Schema({
   name: {
     type: String,
-    maxlength: 50,
+    maxLength: 50,
   },
   email: {
     type: String,
@@ -15,20 +15,18 @@ const userSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    minlength: 5,
+    minLength: 5,
   },
   lastname: {
     type: String,
-    maxlength: 50,
+    maxLength: 50,
   },
   role: {
     type: Number,
     default: 0,
   },
   image: String,
-  token: {
-    type: String,
-  },
+  token: { type: String },
   tokenExp: { type: Number },
 });
 
@@ -41,6 +39,7 @@ userSchema.pre('save', (next) => {
 
       bcrypt.hash(user.password, salt, (err, hash) => {
         if (err) return next(err);
+
         user.password = hash;
         next();
       });
@@ -53,6 +52,7 @@ userSchema.pre('save', (next) => {
 userSchema.methods.comparePassword = (plainPassword, cb) => {
   bcrypt.compare(plainPassword, this.password, (err, isMatch) => {
     if (err) return cb(err);
+
     cb(null, isMatch);
   });
 };
@@ -60,13 +60,25 @@ userSchema.methods.comparePassword = (plainPassword, cb) => {
 userSchema.methods.generateToken = (cb) => {
   const user = this;
 
-  const token = jwt.sign(user._id.toHexString, 'secretToken');
+  const token = jwt.sign(user._id.toHexString(), 'secretToken');
 
   user.token = token;
   user.save((err, user) => {
-    if (err) return cd(err);
+    if (err) return cb(err);
 
     cb(null, user);
+  });
+};
+
+userSchema.statics.findByToken = (token, cb) => {
+  const user = this;
+
+  jwt.verify(token, 'secretToken', (err, decoded) => {
+    user.findOne({ _id: decoded, token: token }, (err, user) => {
+      if (err) return cb(err);
+
+      cb(null, user);
+    });
   });
 };
 
