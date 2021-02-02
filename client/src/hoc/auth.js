@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { auth } from '../_actions/user_action';
 
-export default function Auth(SpecificComponent, option, adminRoute = null) {
+export default function (SpecificComponent, option, adminRoute = null) {
   function AuthenticationCheck(props) {
     const dispatch = useDispatch();
 
@@ -26,7 +26,7 @@ export default function Auth(SpecificComponent, option, adminRoute = null) {
       });
     }, []);
 
-    return <SpecificComponent />;
+    return <SpecificComponent {...props} />;
   }
 
   return AuthenticationCheck;
